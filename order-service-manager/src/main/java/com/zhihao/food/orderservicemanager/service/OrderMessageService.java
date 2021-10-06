@@ -2,6 +2,7 @@ package com.zhihao.food.orderservicemanager.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
 import com.rabbitmq.client.*;
 import com.zhihao.food.orderservicemanager.dao.OrderDetailDao;
 import com.zhihao.food.orderservicemanager.dto.OrderMessageDTO;
@@ -110,6 +111,8 @@ public class OrderMessageService {
                 case ORDER_CREATED:
                     break;
                 case FAILED:
+                    break;
+                default:
                     break;
             }
         } catch (JsonProcessingException | TimeoutException e) {
