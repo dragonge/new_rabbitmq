@@ -61,7 +61,6 @@ public class OrderMessageService {
         log.info("start linstening message");
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost");
-        connectionFactory.setHost("localhost");
         try (Connection connection = connectionFactory.newConnection();
              Channel channel = connection.createChannel()) {
 

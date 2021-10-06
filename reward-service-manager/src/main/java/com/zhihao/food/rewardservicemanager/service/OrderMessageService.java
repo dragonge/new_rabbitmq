@@ -57,7 +57,6 @@ public class OrderMessageService {
         log.info("start linstening message");
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost");
-        connectionFactory.setHost("localhost");
         try (Connection connection = connectionFactory.newConnection();
              Channel channel = connection.createChannel()) {
 
@@ -78,7 +77,7 @@ public class OrderMessageService {
             channel.queueBind(
                     "queue.reward",
                     "exchange.order.reward",
-                    "key.reward");
+                    "key.reward.#");
 
 
             channel.basicConsume("queue.reward", true, deliverCallback, consumerTag -> {

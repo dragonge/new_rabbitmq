@@ -65,14 +65,14 @@ public class OrderMessageService {
                     "key.order");
 
             /*---------------------settlement---------------------*/
-            channel.exchangeDeclare("exchange.order.settlement",
+            channel.exchangeDeclare("exchange.settlement.order",
                     BuiltinExchangeType.FANOUT,
                     true,
                     false,
                     null);
 
             channel.queueBind("queue.order",
-                    "exchange.order.settlement",
+                    "exchange.settlement.order",
                     "key.order");
 
             /*---------------------reward---------------------*/
@@ -126,7 +126,7 @@ public class OrderMessageService {
                     break;
                 case RESTAURANT_CONFIRMED:
                     if (null != orderMessageDTO.getDeliverymanId()) {
-                        orderPO.setStatus(OrderStatus.RESTAURANT_CONFIRMED);
+                        orderPO.setStatus(OrderStatus.DELIVERYMAN_CONFIRMED);
                         orderPO.setDeliverymanId(orderMessageDTO.getDeliverymanId());
                         orderDetailDao.update(orderPO);
                         try (Connection connection = connectionFactory.newConnection();
@@ -148,7 +148,7 @@ public class OrderMessageService {
                         try (Connection connection = connectionFactory.newConnection();
                              Channel channel = connection.createChannel()) {
                             String messageToSend = objectMapper.writeValueAsString(orderMessageDTO);
-                            channel.basicPublish("exchange.order.reward", "key.reward", null, messageToSend.getBytes());
+                            channel.basicPublish("exchange.order.reward", "key.reward.food", null, messageToSend.getBytes());
                         }
                     } else {
                         orderPO.setStatus(OrderStatus.FAILED);
