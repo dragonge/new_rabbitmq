@@ -4,9 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
 	<modules>
-		<module>order-service-manager</module>
-        <module>restaurant-service-manager</module>
-        <module>deliveryman-service-manager</module>
+		<module>order-com.zhihao.food.rewardservicemanager.service-manager</module>
+        <module>restaurant-com.zhihao.food.rewardservicemanager.service-manager</module>
+        <module>deliveryman-com.zhihao.food.rewardservicemanager.service-manager</module>
+        <module>settlement-com.zhihao.food.rewardservicemanager.service-manager</module>
+        <module>reward-com.zhihao.food.rewardservicemanager.service-manager</module>
     </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

@@ -64,6 +64,32 @@ public class OrderMessageService {
                     "exchange.order.deliveryman",
                     "key.order");
 
+            /*---------------------settlement---------------------*/
+            channel.exchangeDeclare("exchange.order.settlement",
+                    BuiltinExchangeType.FANOUT,
+                    true,
+                    false,
+                    null);
+
+            channel.queueBind("queue.order",
+                    "exchange.order.settlement",
+                    "key.order");
+
+            /*---------------------reward---------------------*/
+
+            channel.exchangeDeclare(
+                    "exchange.order.reward",
+                    BuiltinExchangeType.TOPIC,
+                    true,
+                    false,
+                    null);
+
+            channel.queueBind(
+                    "queue.order",
+                    "exchange.order.reward",
+                    "key.order");
+
+
             channel.basicConsume("queue.order", true, deliverCallback, consumerTag -> {
             });
             while (true) {
@@ -99,16 +125,48 @@ public class OrderMessageService {
                     }
                     break;
                 case RESTAURANT_CONFIRMED:
+                    if (null != orderMessageDTO.getDeliverymanId()) {
+                        orderPO.setStatus(OrderStatus.RESTAURANT_CONFIRMED);
+                        orderPO.setDeliverymanId(orderMessageDTO.getDeliverymanId());
+                        orderDetailDao.update(orderPO);
+                        try (Connection connection = connectionFactory.newConnection();
+                             Channel channel = connection.createChannel()) {
+                            String messageToSend = objectMapper.writeValueAsString(orderMessageDTO);
+                            channel.basicPublish("exchange.order.settlement", "key.settlement", null,
+                                    messageToSend.getBytes());
+                        }
+                    } else {
+                        orderPO.setStatus(OrderStatus.FAILED);
+                        orderDetailDao.update(orderPO);
+                    }
                     break;
                 case DELIVERYMAN_CONFIRMED:
+                    if (null != orderMessageDTO.getSettlementId()) {
+                        orderPO.setStatus(OrderStatus.SETTLEMENT_CONFIRMED);
+                        orderPO.setSettlementId(orderMessageDTO.getSettlementId());
+                        orderDetailDao.update(orderPO);
+                        try (Connection connection = connectionFactory.newConnection();
+                             Channel channel = connection.createChannel()) {
+                            String messageToSend = objectMapper.writeValueAsString(orderMessageDTO);
+                            channel.basicPublish("exchange.order.reward", "key.reward", null, messageToSend.getBytes());
+                        }
+                    } else {
+                        orderPO.setStatus(OrderStatus.FAILED);
+                        orderDetailDao.update(orderPO);
+                    }
                     break;
                 case SETTLEMENT_CONFIRMED:
-                    break;
-                case ORDER_CREATED:
-                    break;
-                case FAILED:
+                    if (null != orderMessageDTO.getRewardId()) {
+                        orderPO.setStatus(OrderStatus.ORDER_CREATED);
+                        orderPO.setRewardId(orderMessageDTO.getRewardId());
+                        orderDetailDao.update(orderPO);
+                    } else {
+                        orderPO.setStatus(OrderStatus.FAILED);
+                        orderDetailDao.update(orderPO);
+                    }
                     break;
                 default:
+                    log.info("order status is error, {}", orderPO.getStatus());
                     break;
             }
         } catch (JsonProcessingException | TimeoutException e) {

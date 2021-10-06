@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>order-com.zhihao.food.rewardservicemanager.service-manager</artifactId>
+    <artifactId>reward-service-manager</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -49,5 +49,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>

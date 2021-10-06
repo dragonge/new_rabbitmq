@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>restaurant-service-manager</artifactId>
+    <artifactId>restaurant-com.zhihao.food.rewardservicemanager.service-manager</artifactId>
 
     <dependencies>
         <dependency>
