@@ -5,7 +5,7 @@ package com.zhihao.food.restaurantservicemanager.enummeration;
  * Created by 2021/10/6.
  */
 public enum  ProductStatus {
-    AVALIABIE,
-    NOT_AVALIABLE;
+    AVALIABLE,
+    NOT_AVALIABLE,
 }
 

@@ -12,7 +12,6 @@ import com.zhihao.food.restaurantservicemanager.po.ProductPO;
 import com.zhihao.food.restaurantservicemanager.po.RestaurantPO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -78,11 +77,11 @@ public class OrderMessageService {
 
         try {
             OrderMessageDTO orderMessageDTO = objectMapper.readValue(messageBody, OrderMessageDTO.class);
-            ProductPO productPO = productDao.selsctProduct(orderMessageDTO.getProductId());
+            ProductPO productPO = productDao.selsetProduct(orderMessageDTO.getProductId());
             log.info("onMessage:productPO:{}", productPO);
             RestaurantPO restaurantPO = restaurantDao.selsctRestaurant(productPO.getRestaurantId());
             log.info("onMessage:restaurantPO:{}", restaurantPO);
-            if (ProductStatus.AVALIABIE == productPO.getStatus() && RestaurantStatus.OPEN == restaurantPO.getStatus()) {
+            if (ProductStatus.AVALIABLE == productPO.getStatus() && RestaurantStatus.OPEN == restaurantPO.getStatus()) {
                 orderMessageDTO.setConfirmed(true);
                 orderMessageDTO.setPrice(productPO.getPrice());
             } else {

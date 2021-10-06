@@ -2,7 +2,6 @@ package com.zhihao.food.orderservicemanager.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
 import com.rabbitmq.client.*;
 import com.zhihao.food.orderservicemanager.dao.OrderDetailDao;
 import com.zhihao.food.orderservicemanager.dto.OrderMessageDTO;
@@ -34,12 +33,9 @@ public class OrderMessageService {
         connectionFactory.setHost("localhost");
         try (Connection connection = connectionFactory.newConnection();
              Channel channel = connection.createChannel()) {
-            /**
-             * restaurant
-             */
             channel.exchangeDeclare("exchange.order.restaurant",
                     BuiltinExchangeType.DIRECT,
-                    false,
+                    true,
                     false,
                     null
             );

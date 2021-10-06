@@ -49,7 +49,7 @@ public class OrderService {
         try (Connection connection = connectionFactory.newConnection();
              Channel channel = connection.createChannel()) {
             String messageToSend = objectMapper.writeValueAsString(orderMessageDTO);
-            channel.basicPublish("exchange.order.restaurant", "key.restraurant", null, messageToSend.getBytes());
+            channel.basicPublish("exchange.order.restaurant", "key.restaurant", null, messageToSend.getBytes());
         }
     }
 }

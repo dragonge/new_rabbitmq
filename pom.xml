@@ -6,6 +6,7 @@
 	<modules>
 		<module>order-service-manager</module>
         <module>restaurant-service-manager</module>
+        <module>deliveryman-service-manager</module>
     </modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
