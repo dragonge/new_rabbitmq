@@ -1,0 +1,3 @@
+使用rabbitMQ的高级特性：
+缺点是rabbitmq使用困难
+但是使用springboot整合rabbitMQ使用更好处理
