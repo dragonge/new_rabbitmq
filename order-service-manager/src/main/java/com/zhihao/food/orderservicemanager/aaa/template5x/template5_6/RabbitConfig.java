@@ -1,27 +1,24 @@
-import com.zhihao.food.orderservicemanager.service.OrderMessageService;
+package com.zhihao.food.orderservicemanager.aaa.template5x.template5_6;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 //@Configuration
 public class RabbitConfig {
-
     @Autowired
     OrderMessageService orderMessageService;
-
-    @Autowired
-    public void startListenMessage() throws IOException, TimeoutException, InterruptedException {
-        orderMessageService.handleMessage();
-    }
 
 
     /*---------------------restaurant---------------------*/
@@ -106,11 +103,12 @@ public class RabbitConfig {
         connectionFactory.setPort(5672);
         connectionFactory.setPassword("guest");
         connectionFactory.setUsername("guest");
-        connectionFactory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.SIMPLE);
+        connectionFactory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
         connectionFactory.setPublisherReturns(true);
         connectionFactory.createConnection();
         return connectionFactory;
     }
+
 
     @Bean
     public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
@@ -120,24 +118,54 @@ public class RabbitConfig {
     }
 
     @Bean
-    RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMandatory(true);
-
+        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+            log.info("message:{}, replyCode:{}, replyText:{}, exchange:{}, routingKey:{}",
+                    message, replyCode, replyText, exchange, routingKey);
+        });
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) ->
-                log.info("correlationData:{}, ack:{}, cause{}",
-                        correlationData,
-                        ack,
-                        cause));
-        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) ->
-                log.info(
-                        "message:{}, replyCode:{}, replyText:{}, exchange:{}, routingKey{}",
-                        message,
-                        replyCode,
-                        replyText,
-                        exchange,
-                        routingKey));
+                log.info("correlationData:{}, ack:{}, cause:{}",
+                        correlationData, ack, cause));
         return rabbitTemplate;
+    }
+
+    @Bean
+    public SimpleMessageListenerContainer messageListenerContainer(@Autowired ConnectionFactory connectionFactory) {
+        SimpleMessageListenerContainer messageListenerContainer =
+                new SimpleMessageListenerContainer(connectionFactory);
+        messageListenerContainer.setQueueNames("queue.order");
+        messageListenerContainer.setConcurrentConsumers(3);
+        messageListenerContainer.setMaxConcurrentConsumers(5);
+        messageListenerContainer.setAcknowledgeMode(AcknowledgeMode.AUTO);
+//        messageListenerContainer.setMessageListener(new MessageListener() {
+//            @Override
+//            public void onMessage(Message message) {
+//                log.info("message:{}", message);
+//            }
+//        });
+        //        messageListenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        //        messageListenerContainer.setMessageListener(new ChannelAwareMessageListener() {
+        //            @Override
+        //            public void onMessage(Message message, Channel channel) throws Exception {
+        //                log.info("message:{}", message);
+        //                channel.basicAck(
+        //                        message.getMessageProperties().getDeliveryTag(),
+        //                        false
+        //                );
+        //            }
+        //        });
+        //        messageListenerContainer.setPrefetchCount(1);
+
+        MessageListenerAdapter listenerAdapter = new MessageListenerAdapter();
+        listenerAdapter.setDelegate(orderMessageService);
+
+        Map<String, String> methodMap = new HashMap<>(8);
+        methodMap.put("queue.order", "handleMessage1");
+        listenerAdapter.setQueueOrTagToMethodName(methodMap);
+        messageListenerContainer.setMessageListener(listenerAdapter);
+        return messageListenerContainer;
     }
 
 }
